@@ -1,0 +1,170 @@
+/* Header */
+#logo-img {
+    margin-bottom: 30px;
+}
+
+header {
+    padding: 40px 0px 0px 0px !important;
+}
+
+header > div > button {
+    width: 56px !important;
+    height: 56px !important;
+    line-height: 48px !important;
+}
+
+header button i {
+    font-size: 32px !important;
+}
+
+.mdl-menu__item > a {
+    text-decoration: none;
+    color: black;
+    margin: 0px;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Drawer */
+.drawer {
+    background: #eeeeec !important;
+    width: 250px;
+}
+
+#main-logo {
+    position: fixed;
+    z-index: 10;
+    margin-top: -5px;
+    margin-left: -10px;
+}
+
+.drawer h3 {
+    margin-top: 215px;
+    margin-bottom: 0px;
+    font-size: 1.5em;
+    background: #d3d7cf;
+    padding-left: 10px;
+}
+
+.drawer h3 + h4 {
+    margin-top: 0px;
+}
+
+.drawer h4 {
+    font-size: 1.3em;
+    background: #E5E6E2;
+    padding-left: 10px;
+}
+
+.drawer > div {
+    margin-left: 20px;
+}
+
+.drawer p {
+    color: #888a85;
+}
+
+.drawer i {
+    position: relative;
+    font-size: 20px;
+    top: 5px;
+    margin-right: 10px;
+}
+
+/* Main area */
+main > div > div > div {
+    margin: 0px 70px;
+}
+
+main h2 {
+    font-size: 2.5em;
+}
+
+main h3 {
+    font-size: 1.5em;
+}
+
+main table {
+    margin: 0px 20px;
+}
+
+#game-canvas canvas {
+	alignment: center;
+	margin: 20px auto;
+	background-color: #eeeeec !important;
+    background:  url('assets/bg.jpg') center / cover;
+    border: 1px solid #aaa;
+    border-radius: 5px;
+	padding: 5px;
+}
+
+.plot {
+    height: 500px;
+    font-size: 14px;
+    line-height: 1.2em;
+}
+
+
+/* Modal windows */
+.modal-window {
+	position: fixed;
+	font-family: Roboto, Arial, Helvetica, sans-serif;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: rgba(0,0,0,0.8);
+	z-index: 999999;
+	opacity:0;
+	-webkit-transition: opacity 200ms ease-in;
+	-moz-transition: opacity 200ms ease-in;
+	transition: opacity 200ms ease-in;
+	pointer-events: none;
+}
+
+.modal-window:target {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.modal-window > div {
+	width: 40%;
+	position: relative;
+	margin: 50px auto;
+	background: #fff;
+}
+
+.modal-close {
+	background: #606061;
+	color: #FFFFFF;
+	line-height: 25px;
+	position: absolute;
+	right: -12px;
+	text-align: center;
+	top: -10px;
+	width: 24px;
+	text-decoration: none;
+	font-weight: bold;
+	-webkit-border-radius: 12px;
+	-moz-border-radius: 12px;
+	border-radius: 12px;
+	-moz-box-shadow: 1px 1px 3px #000;
+	-webkit-box-shadow: 1px 1px 3px #000;
+	box-shadow: 1px 1px 3px #000;
+}
+
+.modal-close:hover { background: #00d9ff; }
+
+.modal-window .mdl-card__title {
+    background: #eee;
+}
+
+#modal-about .mdl-card__title {
+    height: 176px;
+    background: url('http://www.getmdl.io/assets/demos/welcome_card.jpg') center / cover;
+}
+
+#modal-help > div {
+    width: 60%;
+}
