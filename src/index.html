@@ -1,0 +1,543 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="A front-end template that helps you build fast, modern mobile web apps.">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bubbles - genetic simulator</title>
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Material Design Lite">
+  <!--<link rel="apple-touch-icon-precomposed" href="images/ios-desktop.png">-->
+
+  <!-- Tile icon for Win8 (144x144 + tile color) -->
+  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+  <meta name="msapplication-TileColor" content="#3372DF">
+
+  <!-- Material design elements -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:regular,bold,italic,thin,light,bolditalic,black,medium&amp;lang=en" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="material.css">
+  <script type="text/javascript" src="material.min.js"></script>
+
+  <!-- Phaser javascript -->
+  <script type="text/javascript" src="js/phaser.min.js"></script>
+  <script src="jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery.flots.js"></script>
+  <script type="text/javascript" src="bower_components/mustache/mustache.min.js"></script>
+  <script type="text/javascript" src="bubble-compiled.js"></script>
+  <link rel="stylesheet" href="bubble.css">
+</head>
+
+<body>
+<img id="main-logo" src="logo.png">
+
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+
+<!--
+  Main header
+  ===========
+
+  The header contains a menu and some controls for the simulation state.
+-->
+<header class="mdl-layout__header">
+  <div class="mdl-layout__header-row headline">
+    <span class="mdl-typography--display-2">bubblegame</span>
+
+    <span style="width: 5%;"></span>
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="toolbar-menu">
+      <i class="material-icons">add</i>
+    </button>
+    <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-left" for="toolbar-menu">
+      <li class="mdl-menu__item"><a href="#modal-new-population">New population</a></li>
+      <li class="mdl-menu__item" onclick="game.reset_population()">Reset population</li>
+
+      <li class="mdl-menu__item">
+        <span>New Mutation (A3) </span>
+        <button onclick="game.new_mutation.left(0)">Left</button>
+        <button onclick="game.new_mutation.random(0)">Random</button>
+        <button onclick="game.new_mutation.right(0)">Right</button>
+      </li>
+
+      <li class="mdl-menu__item">
+        <span>New Mutation (B3) </span>
+        <button onclick="game.new_mutation.left(1)">Left</button>
+        <button onclick="game.new_mutation.random(1)">Random</button>
+        <button onclick="game.new_mutation.right(1)">Right</button>
+      </li>
+
+      <li class="mdl-menu__item">
+        <span>Bottleneck </span>
+        <button onclick="game.bottleneck.left()">Left</button>
+        <button onclick="game.bottleneck.total()">Total</button>
+        <button onclick="game.bottleneck.right()">Right</button>
+      </li>
+    </ul>
+
+    <span style="width: 3%;"></span>
+
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" onclick="game.speed.pause()">
+      <i class="material-icons">pause</i>
+    </button>
+
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" onclick="game.speed.normal()">
+      <i class="material-icons">play_arrow</i>
+    </button>
+
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" onclick="game.speed.fast()">
+      <i class="material-icons">fast_forward</i>
+    </button>
+
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" onclick="game.speed.jump()">
+      <i class="material-icons">skip_next</i>
+    </button>
+
+
+    <!-- Menu button -->
+    <div class="mdl-layout-spacer"></div>
+    <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="toolbar-more">
+      <i class="material-icons">more_vert</i>
+    </button>
+    <ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect mdl-menu--bottom-right" for="toolbar-more">
+      <li class="mdl-menu__item"><a href="#modal-about">About</a></li>
+      <li class="mdl-menu__item"><a href="#modal-natural-selection">Configure natural selection</a></li>
+      <li class="mdl-menu__item"><a href="#modal-export-csv">Export to CSV</a></li>
+      <li class="mdl-menu__item"><a href="#modal-help">Help</a></li>
+    </ul>
+  </div>
+</header>
+
+<!--
+  Controls drawer
+  ===============
+
+  The control drawer have some sliders, buttons and other controls that affect
+  some aspects and parameters of the simulation in real time.
+-->
+<div class="drawer mdl-layout__drawer">
+  <h3>Controls</h3>
+
+  <!-- Isolation: control SEPARATION_FORCE global variable -->
+  <h4>Sub-structure</h4>
+  <div id="menu-separation-force">
+    <p><i class="material-icons" role="presentation">people</i>Isolation probability</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="100" tabindex="0" id="input-separation-force">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-separation-force" lang="pt">
+    A taxa de isolamento define o quanto a população do lado esquerdo segrega da população do lado direito.
+  </div>
+
+  <!-- Isolation: control SEPARATION_POINT global variable -->
+  <div id="menu-separation-point">
+    <p><i class="material-icons" role="presentation">delete</i>Separation point</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="50" tabindex="0" id="input-separation-point">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-separation-point" lang="pt">
+    #TODO
+  </div>
+
+  <!-- Competition: control MAX_DENSITY global variable -->
+  <h4>Environment</h4>
+  <div id="menu-starvation-per-collision">
+    <p><i class="material-icons" role="presentation">delete</i>Maximum density</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="50" tabindex="0" id="input-max-density">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-starvation-per-collision" lang="pt">
+    #TODO
+  </div>
+
+  <div id="menu-selection-pressure">
+    <p><i class="material-icons" role="presentation">delete</i>Selection pressure</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="50" tabindex="0" id="input-selection-pressure">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-starvation-per-collision" lang="pt">
+    #TODO
+  </div>
+
+  <!-- Mutation rate: control MUTATION_RATE_A global variable -->
+  <h4>Mutation and linkage</h4>
+  <div id="menu-mutation-rate-a">
+    <p><i class="material-icons" role="presentation">delete</i>Mutation rate (A)</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="0" tabindex="0" id="input-mutation-rate-a">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-mutation-rate-a" lang="pt">
+    #TODO
+  </div>
+
+  <!-- Mutation rate: control MUTATION_RATE_B global variable -->
+  <div id="menu-mutation-rate-b">
+    <p><i class="material-icons" role="presentation">delete</i>Mutation rate (B)</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="0" tabindex="0" id="input-mutation-rate-b">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-mutation-rate-b" lang="pt">
+    #TODO
+  </div>
+
+  <!-- Linkage factor: control LINKAGE global variable -->
+  <div id="menu-linkage">
+    <p><i class="material-icons" role="presentation">delete</i>Linkage</p>
+    <input class="mdl-slider mdl-js-slider" type="range" min="0" max="100" value="0" tabindex="0" id="input-linkage">
+  </div>
+  <div class="mdl-tooltip mdl-tooltip--large" for="menu-mutation-rate-b" lang="pt">
+    Probability of inheriting both genes from the same chromossome.
+  </div>
+
+  <div class="mdl-layout-spacer"></div>
+</div>
+
+
+<!--
+   Main contents
+   =============
+
+   The main content area consists of a Phaser.js simulation and the
+   corresponding analysis views.
+ -->
+<main class="mdl-layout__content">
+<div class="mdl-grid">
+  <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+    <div class="mdl-tabs__tab-bar">
+      <a href="#content-tab-simulation" class="mdl-tabs__tab is-active">Simulation</a>
+      <a href="#content-tab-plots" class="mdl-tabs__tab">Plots</a>
+      <a href="#content-tab-tables" class="mdl-tabs__tab">Tables</a>
+    </div>
+
+    <!--
+      Game simulation
+      ===============
+    -->
+    <div class="mdl-tabs__panel is-active" id="content-tab-simulation">
+      <div class="mdl-shadow--2dp mdl-cell mdl-cell--12-col" id="game-canvas"></div>
+    </div>
+
+
+    <!--
+      Plots Component
+      ===============
+    -->
+    <div class="mdl-tabs__panel" id="content-tab-plots" id="content-tab-plots">
+      <h2>Sub-population proportions</h2>
+      <p>The number of individuals in each sub-population and on total.</p>
+      <div id="plot-population" class="plot mdl-cell mdl-cell--12-col"></div>
+
+      <h2>Allele frequency (<span id="plot-allele-name">A</span>)</h2>
+      <p>Fraction of each allele for the selected gene. Select the desired gene to track.</p>
+      <div id="plot-allele-a" class="plot mdl-cell mdl-cell--12-col"></div>
+      <div style="text-align: right;">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="plots.track_gene('A')">Track A</button>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" onclick="plots.track_gene('B')">Track B</button>
+      </div>
+    </div>
+
+
+    <!--
+      Tables
+      ======
+    -->
+    <div class="mdl-tabs__panel" id="content-tab-tables">
+      <h2>Proportions</h2>
+      <p>Display data on the number of individuals in each population.</p>
+
+      <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" id="stats-table-count">
+        <thead>
+          <tr>
+            <th></th><th>Total</th><th>Left</th><th>Right</th>
+          </tr>
+        </thead>
+        <tbody id="stats-table-count-tbody"></tbody>
+      </table>
+
+      <h2>Allelic and Genotypic frequencies</h2>
+
+      <p>These tables display the frequencies of each allele and genotype for both sub-populations. These frequencies
+      are important to understand the equilibrium dynamics of the population. Notice that the A3 and B3 alleles
+      are initially disabled and may be introduced only through mutation or migration.</p>
+
+      <div class="mdl-grid">
+        <div class=" mdl-cell-4-col">
+        <h3>Alleles</h3>
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp mdl-cell-3-col" id="stats-table-alleles">
+          <thead>
+            <tr>
+              <th>Allele</th><th>Total</th><th>Left</th><th>Right</th>
+            </tr>
+          </thead>
+          <tbody id="stats-table-alleles-tbody"></tbody>
+        </table>
+        </div>
+
+        <div class=" mdl-cell-4-col">
+        <h3>Genotype (A)</h3>
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp mdl-cell-3-col" id="stats-table-genetic-a">
+          <thead>
+            <tr>
+              <th>Genotype</th><th>Total</th><th>Left</th><th>Right</th>
+            </tr>
+          </thead>
+          <tbody id="stats-table-genetic-a-tbody"></tbody>
+        </table>
+        </div>
+
+        <div class=" mdl-cell-4-col">
+        <h3>Genotype (B)</h3>
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" id="stats-table-genetic-b">
+          <thead>
+            <tr>
+              <th>Genotype</th><th>Total</th><th>Left</th><th>Right</th>
+            </tr>
+          </thead>
+          <tbody id="stats-table-genetic-b-tbody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+</main>
+</div>
+
+<!--
+  Modal windows
+  =============
+-->
+<div id="modal-about" class="modal-window">
+  <div class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">About</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+      <dl>
+        <dt>Authors:</dt>
+        <dd>Fábio M. Mendes, Carolina C. Gontijo.</dd>
+      </dl>
+      <p>This simulation is Free Software.</p>
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="#__cancel">
+        Cancel
+      </a>
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="http://github.com/fabiommendes/bubbles/">
+        Get it at Github!
+      </a>
+    </div>
+
+    <div class="mdl-card__menu">
+      <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+         href="#__close">
+        <i class="material-icons">close</i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="modal-natural-selection" class="modal-window">
+  <div class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">Natural selection</h2>
+    </div>
+    <div class="mdl-card__supporting-text">
+      <p>The reference fitness parameter is 1.0. Use values greater than 1.0 for positive adaptations and values smaller
+        than 1.0 for detrimental changes</p>
+
+      <h4>Relative fitness table</h4>
+      <table  class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="width: 80%; margin: 0px 10%" id="fitness-table">
+        <thead>
+          <tr><th>Genotype</th><th>Fitness value</th></tr>
+        </thead>
+        <tbody id="fitness-table-body">
+          <tr>
+            <td>
+              <div class="mdl-textfield mdl-js-textfield" style="width: 100%">
+                <input class="mdl-textfield__input" value="A11B11" type="text" id="fitness-gene-name">
+                <label class="mdl-textfield__label" for="fitness-gene-name">Genotype</label>
+              </div>
+            </td>
+
+            <td>
+              <div class="mdl-textfield mdl-js-textfield" style="width: 100%">
+                <input class="mdl-textfield__input" type="text" value="1.0" pattern="-?[0-9]*(\.[0-9]+)?" id="fitness-value">
+                <label class="mdl-textfield__label" for="fitness-value">Relative fitness</label>
+                <span class="mdl-textfield__error">Input is not a valid fitness ratio!</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class=" mdl-textfield--align-right">
+        <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored" onclick="fitness.add_value()">
+          <i class="material-icons">add</i>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="#__cancel">
+        Close
+      </a>
+    </div>
+
+    <div class="mdl-card__menu">
+      <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+         href="#__close">
+        <i class="material-icons">close</i>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<div id="modal-help" class="modal-window">
+  <div class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">Help</h2>
+    </div>
+
+    <div class="mdl-card__supporting-text">
+      <p>This is the main help page!</p>
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="#__cancel">
+        Cancel
+      </a>
+    </div>
+
+    <div class="mdl-card__menu">
+      <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+         href="#__close">
+        <i class="material-icons">close</i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="modal-export-csv" class="modal-window">
+  <div class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">Export to CSV</h2>
+    </div>
+
+    <div class="mdl-card__supporting-text">
+      <p>Configure main CSV parameters</p>
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="#__cancel">
+        Cancel
+      </a>
+      <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         onclick="download('data.csv', 'hello world')">
+        Download
+      </button>
+    </div>
+
+    <div class="mdl-card__menu">
+      <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+         href="#__close">
+        <i class="material-icons">close</i>
+      </a>
+    </div>
+  </div>
+</div>
+
+<div id="modal-new-population" class="modal-window">
+  <div class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+      <h2 class="mdl-card__title-text">New Population</h2>
+    </div>
+
+    <div class="mdl-card__supporting-text">
+      <p>In this dialog you can either insert new individuals from an equilibrium population or completely replace the
+        current simulations. It is possible to configure the allelic frequencies for the new individuals by setting the
+        relative values in a table.
+      </p>
+
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <input class="mdl-textfield__input" type="text" pattern="[0-9]+" value="50" id="new-population-size">
+        <label class="mdl-textfield__label" for="new-population-size">Population size</label>
+        <span class="mdl-textfield__error">Input is not a number!</span>
+      </div>
+
+      <div class="mdl-grid">
+        <div class="mdl-cell-6col">
+          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+            <thead>
+              <tr>
+                <th>Allele</th>
+                <th>Relative frequency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>A1</td><td><input type="text" id="allele-freq-a1" value="1.0"></td></tr>
+              <tr><td>A2</td><td><input type="text" id="allele-freq-a2" value="1.0"></td></tr>
+              <tr><td>A3</td><td><input type="text" id="allele-freq-a3" value="0.0"></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mdl-cell-6col">
+          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+            <thead>
+              <tr>
+                <th>Allele</th>
+                <th>Relative frequency</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>B1</td><td><input type="text" id="allele-freq-b1" value="1.0"></td></tr>
+              <tr><td>B2</td><td><input type="text" id="allele-freq-b2" value="1.0"></td></tr>
+              <tr><td>B3</td><td><input type="text" id="allele-freq-b3" value="0.0"></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="new-population-insert-right">
+        <span class="mdl-switch__label">Insert only to right</span>
+        <input type="checkbox" id="new-population-insert-right" class="mdl-switch__input">
+      </label>
+
+    </div>
+
+    <div class="mdl-card__actions mdl-card--border">
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         href="#__cancel">
+        Cancel
+      </a>
+
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         onclick="game.influx_population()">
+        Influx
+      </a>
+
+      <a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+         onclick="game.replace_population()">
+        Replace population
+      </a>
+    </div>
+
+    <div class="mdl-card__menu">
+      <a class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect"
+         href="#__close">
+        <i class="material-icons">close</i>
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
